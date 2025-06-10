@@ -1,8 +1,10 @@
 import pandas as pd 
 import mlflow
+from prefect import task, flow
 from sklearn.linear_model import LinearRegression
 from sklearn.feature_extraction import DictVectorizer
 
+@task()
 def read_data(file_path):
     """
     Reads a Parquet file and returns a DataFrame.
@@ -18,6 +20,7 @@ def read_data(file_path):
 
     return df 
 
+@task()
 def read_dataframe(filename):
     df = read_data(filename)
 
@@ -33,8 +36,7 @@ def read_dataframe(filename):
     
     return df
 
-
-
+@task()
 def transform_data(df):
     """
     Transforms the training data by extracting features and target variable.
@@ -54,6 +56,7 @@ def transform_data(df):
 
     return X, y, dv
 
+@task()
 def train_model(df):
     """
     Trains a linear regression model on the provided features and target variable.
@@ -88,8 +91,8 @@ def train_model(df):
     
     return model, dv
 
-
-if __name__ == "__main__":
+@flow()
+def main():
     # Example usage
     file_path = "/Users/eliasdzobo/Desktop/2025/mlops-2025/data/yellow_tripdata_2023-03.parquet"
     df = read_dataframe(file_path)
@@ -101,3 +104,7 @@ if __name__ == "__main__":
     import pickle
     pickle.dump(model, open('model.pkl', 'wb'))
     pickle.dump(dv, open('dict_vectorizer.pkl', 'wb'))
+
+
+if __name__ == "__main__":
+    main()
